@@ -130,6 +130,7 @@ public class Patient extends Thread {
 	 * movement is animated by the GUI and the index is increased by one.
 	 */
 	private void advanceProtocol() {
+		
 		// TODO
 	}
 
