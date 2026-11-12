@@ -130,8 +130,9 @@ public class Patient extends Thread {
 	 * movement is animated by the GUI and the index is increased by one.
 	 */
 	private void advanceProtocol() {
-		
-		// TODO
+		EmergencyRoomGUI.getInstance().animateTransfer(this, this.protocol.get(indexProtocol));
+		this.location = this.protocol.get(indexProtocol).getTo();
+		this.indexProtocol++ ; 
 	}
 
 	/**
@@ -140,7 +141,10 @@ public class Patient extends Thread {
 	 * Area.
 	 */
 	private void attendedAtLocation() {
-		// TODO
+		try{ 
+			sleep(this.location.getTime());
+		
+		} catch(InterruptedException e) { }
 	}
 
 	/**
@@ -150,7 +154,11 @@ public class Patient extends Thread {
 	 */
 	@Override
 	public void run() {
-		// TODO
+		while(this.indexProtocol<this.protocol.size()) {
+			this.attendedAtLocation();
+			this.advanceProtocol();
+		}
+		EmergencyRoomGUI.getInstance().removePatient(this);
 	}
 
 }
