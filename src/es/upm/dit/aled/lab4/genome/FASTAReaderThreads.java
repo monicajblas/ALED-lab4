@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -115,8 +116,38 @@ public class FASTAReaderThreads {
 	 *         pattern in the data.
 	 */
 	public List<Integer> search(byte[] pattern) {
-		// TODO
-		return null;
+		List<Integer> resultados = new ArrayList<Integer>(); //me creo la lista que voy a devolver
+		
+		int cores = Runtime.getRuntime().availableProcessors(); //preguntamos al ordenador cuántos cores tenemos
+		System.out.println("Tenemos " + cores + " cores");
+		ExecutorService executor = Executors.newFixedThreadPool(cores); //creamos el executor
+		
+		Future<List<Integer>>[] futures = new Future[cores]; 
+		//me creo el array donde voy a guardar los resultados "promesa", de tamaño de cuantos cores tengo
+		//Future <T> la T es el tipo de resultado del método
+		
+		int tamano = content.length/ cores; //tamaño q maneja cada hebra 
+		int lo = 0;
+		int hi = 0 + tamano; //
+		
+		for(int i = lo; i<cores; i++) { //tantas iteraciones como cores
+			Callable<List<Integer>> task = new FASTASearchCallable(this,lo, hi, pattern); 
+			//creo una tarea donde le digo con q reader quiero q se haga el estudio, desde donde y hasta donde y con q patrón
+			futures[i] = executor.submit(task); 
+			//le pido al executor y le digo q me busque una hebra para ejecutar (submit) 
+			//la hebra q hemos creado (task), cuando la tiene, la guarda en el array de futures de donde habrá q sacar el resultado
+			lo += tamano; 
+			hi += tamano; 
+		}
+		
+		for(int i =0; i<futures.length; i++)
+			try {
+				resultados.addAll(futures[i].get());
+				//para desempaquetar lo q tenemos en futures y ya meterlo bien en la lista de resultados
+			} catch (Exception e) { } 
+		
+		executor.shutdown(); //OJO! CIERRA EL EXECUTOR!!!!!!!!
+		return resultados;
 	}
 
 	public static void main(String[] args) {

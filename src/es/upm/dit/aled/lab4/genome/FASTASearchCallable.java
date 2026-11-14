@@ -3,6 +3,7 @@ package es.upm.dit.aled.lab4.genome;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
+import es.upm.dit.aled.lab4.genome.FASTAException;
 
 /**
  * Callable task that performs a linear search over a specific section of a
@@ -31,7 +32,10 @@ public class FASTASearchCallable implements Callable<List<Integer>> {
 	 * @param pattern The pattern to be found.
 	 */
 	public FASTASearchCallable(FASTAReaderThreads reader, int lo, int hi, byte[] pattern) {
-		// TODO
+		this.reader= reader;
+		this.lo=lo;
+		this.hi=hi;
+		this.pattern=pattern;
 	}
 
 	/**
@@ -44,8 +48,16 @@ public class FASTASearchCallable implements Callable<List<Integer>> {
 	 */
 	@Override
 	public List<Integer> call() throws Exception {
-		// TODO
-		return null;
+		List<Integer> index = new ArrayList<Integer>();
+		for(int i = lo; i<hi; i++) { //recorro el array desde lo hasta hi 
+			try {
+			if(this.compare(pattern, i))   //si al invocar  método compare, encuentra un patrón q coincida, 
+				index.add(i);              //añado la posición a la nueva lista 
+			} catch(FASTAException e) {    //si se me he salido/ ido muy a la derecha del array lanza expcepción
+				break ;                    //se termina el for 
+			}
+		}
+		return index;
 	}
 
 	/*
